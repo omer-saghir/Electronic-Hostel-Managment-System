@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Management System — Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --navy: #0f1b2d;
+            --navy-light: #1a2d45;
+            --gold: #c9a84c;
+            --gold-light: #e2c47a;
+            --cream: #f5f0e8;
+            --cream-dark: #ede6d6;
+            --text-dark: #0f1b2d;
+            --text-muted: #6b7a8d;
+            --error: #c0392b;
+            --success: #1a7a4a;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--navy);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(201,168,76,0.04) 60px, rgba(201,168,76,0.04) 61px),
+                repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(201,168,76,0.04) 60px, rgba(201,168,76,0.04) 61px);
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .login-wrapper {
+            display: flex;
+            width: 900px;
+            min-height: 540px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1;
+            animation: fadeUp 0.7s ease both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Left panel */
+        .left-panel {
+            flex: 1;
+            background: var(--navy-light);
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 1px solid rgba(201,168,76,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            bottom: -80px;
+            left: -80px;
+            width: 300px;
+            height: 300px;
+            border: 1px solid rgba(201,168,76,0.1);
+            border-radius: 50%;
+        }
+
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -120px;
+            left: -120px;
+            width: 400px;
+            height: 400px;
+            border: 1px solid rgba(201,168,76,0.06);
+            border-radius: 50%;
+        }
+
+        .brand {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+            font-size: 24px;
+        }
+
+        .brand h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 28px;
+            color: var(--cream);
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+
+        .brand p {
+            color: rgba(245,240,232,0.5);
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .stats-row {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .stat-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .stat-item span {
+            color: rgba(245,240,232,0.6);
+            font-size: 13px;
+            font-weight: 300;
+        }
+
+        /* Right panel */
+        .right-panel {
+            width: 420px;
+            background: var(--cream);
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-header {
+            margin-bottom: 40px;
+        }
+
+        .form-header h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 32px;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1.5px solid var(--cream-dark);
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            color: var(--text-dark);
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+        }
+
+        .form-group input::placeholder {
+            color: #b0b8c4;
+        }
+
+        .error-msg {
+            background: #fdf0ef;
+            border: 1px solid #f5c6c2;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--error);
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: var(--navy);
+            color: var(--cream);
+            border: none;
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 8px;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-login:hover {
+            background: var(--navy-light);
+        }
+
+        .btn-login:active {
+            transform: scale(0.99);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 28px 0 24px;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--cream-dark);
+        }
+
+        .divider span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            color: var(--navy);
+            border: 1.5px solid var(--cream-dark);
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .btn-register:hover {
+            border-color: var(--gold);
+            background: rgba(201,168,76,0.05);
+        }
+
+        /* Register modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,27,45,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: var(--cream);
+            border-radius: 16px;
+            padding: 40px;
+            width: 380px;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal h3 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 24px;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .modal p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: 1.5px solid var(--cream-dark);
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 12px;
+            background: var(--navy);
+            border: none;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--cream);
+        }
+
+        .success-msg {
+            background: #edf7f2;
+            border: 1px solid #a8d5be;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--success);
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <!-- Left Panel -->
+    <div class="left-panel">
+        <div class="brand">
+            <div class="brand-icon">🏠</div>
+            <h1>Hostel Management System</h1>
+            <p>A centralized platform to manage rooms, students, payments, and hostel operations efficiently.</p>
+        </div>
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-dot"></div>
+                <span>Real-time room availability tracking</span>
+            </div>
+            <div class="stat-item">
+                <div class="stat-dot"></div>
+                <span>Automated rent payment records</span>
+            </div>
+            <div class="stat-item">
+                <div class="stat-dot"></div>
+                <span>Student and tenant management</span>
+            </div>
+            <div class="stat-item">
+                <div class="stat-dot"></div>
+                <span>Complaint and maintenance logging</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
+        <div class="form-header">
+            <h2>Welcome back</h2>
+            <p>Sign in to your admin account to continue</p>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="success-msg" id="successMsg"></div>
+
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Enter your username" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Enter your password">
+        </div>
+
+        <button class="btn-login" id="loginBtn" onclick="handleLogin()">Sign In</button>
+
+        <div class="divider"><span>or</span></div>
+
+        <button class="btn-register" onclick="openModal()">Create Admin Account</button>
+    </div>
+</div>
+
+<!-- Register Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h3>Create Account</h3>
+        <p>Register a new administrator account</p>
+
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="regUsername" placeholder="Choose a username">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="regPassword" placeholder="Choose a password">
+        </div>
+
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-submit" onclick="handleRegister()">Create Account</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function handleLogin() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const btn = document.getElementById('loginBtn');
+        const errorMsg = document.getElementById('errorMsg');
+
+        errorMsg.style.display = 'none';
+
+        if (!username || !password) {
+            errorMsg.textContent = 'Please enter both username and password.';
+            errorMsg.style.display = 'block';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Signing in...';
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.username);
+                window.location.href = '/dashboard.html';
+            } else {
+                errorMsg.textContent = data.message || 'Invalid credentials.';
+                errorMsg.style.display = 'block';
+            }
+        } catch (err) {
+            errorMsg.textContent = 'Cannot connect to server. Make sure the backend is running.';
+            errorMsg.style.display = 'block';
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+    }
+
+    async function handleRegister() {
+        const username = document.getElementById('regUsername').value.trim();
+        const password = document.getElementById('regPassword').value.trim();
+
+        if (!username || !password) {
+            alert('Please fill in both fields.');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                closeModal();
+                const successMsg = document.getElementById('successMsg');
+                successMsg.textContent = 'Account created! You can now log in.';
+                successMsg.style.display = 'block';
+            } else {
+                alert(data.message || 'Registration failed.');
+            }
+        } catch (err) {
+            alert('Cannot connect to server.');
+        }
+    }
+
+    function openModal() {
+        document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('active');
+    }
+
+    // Press Enter to login
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleLogin();
+    });
+
+    // If already logged in go straight to dashboard
+    if (localStorage.getItem('token')) {
+        window.location.href = '/dashboard.html';
+    }
+</script>
+</body>
+</html>

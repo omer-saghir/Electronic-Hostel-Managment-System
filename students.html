@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students — Hostel Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --navy: #0f1b2d;
+            --navy-light: #1a2d45;
+            --gold: #c9a84c;
+            --gold-light: #e2c47a;
+            --cream: #f5f0e8;
+            --cream-dark: #ede6d6;
+            --sidebar-w: 240px;
+            --text-dark: #0f1b2d;
+            --text-muted: #6b7a8d;
+            --success: #1a7a4a;
+            --danger: #c0392b;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f0ece3;
+            display: flex;
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--navy);
+            min-height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-brand {
+            padding: 28px 24px 24px;
+            border-bottom: 1px solid rgba(201,168,76,0.15);
+        }
+
+        .sidebar-brand .icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; margin-bottom: 12px;
+        }
+
+        .sidebar-brand h2 {
+            font-family: 'DM Serif Display', serif;
+            color: var(--cream); font-size: 16px; line-height: 1.3;
+        }
+
+        .sidebar-brand p { color: rgba(245,240,232,0.4); font-size: 11px; margin-top: 3px; }
+
+        .sidebar-nav { flex: 1; padding: 20px 0; }
+
+        .nav-label {
+            padding: 0 24px;
+            font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+            text-transform: uppercase; color: rgba(245,240,232,0.3);
+            margin-bottom: 8px; margin-top: 16px;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 24px; color: rgba(245,240,232,0.6);
+            text-decoration: none; font-size: 14px;
+            transition: all 0.15s; cursor: pointer;
+            border: none; background: none; width: 100%; text-align: left;
+        }
+
+        .nav-item:hover { color: var(--cream); background: rgba(255,255,255,0.05); }
+        .nav-item.active { color: var(--gold); background: rgba(201,168,76,0.1); border-right: 2px solid var(--gold); }
+        .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+        .sidebar-footer { padding: 20px 24px; border-top: 1px solid rgba(201,168,76,0.1); }
+
+        .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+
+        .user-avatar {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 14px; font-weight: 600; color: var(--navy);
+        }
+
+        .user-info span { color: var(--cream); font-size: 13px; font-weight: 500; }
+
+        .btn-logout {
+            width: 100%; padding: 9px;
+            background: rgba(192,57,43,0.15); border: 1px solid rgba(192,57,43,0.3);
+            border-radius: 8px; color: #e87c74;
+            font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer;
+        }
+
+        .btn-logout:hover { background: rgba(192,57,43,0.25); }
+
+        /* ── Main ── */
+        .main { margin-left: var(--sidebar-w); flex: 1; padding: 36px 40px; animation: fadeIn 0.4s ease both; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            display: flex; align-items: center;
+            justify-content: space-between; margin-bottom: 28px;
+        }
+
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 30px; }
+        .page-header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+        .btn-primary {
+            padding: 11px 22px;
+            background: var(--navy); color: var(--cream);
+            border: none; border-radius: 10px;
+            font-family: 'DM Sans', sans-serif; font-size: 14px;
+            font-weight: 500; cursor: pointer; transition: background 0.2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .btn-primary:hover { background: var(--navy-light); }
+
+        /* Search bar */
+        .toolbar {
+            display: flex; gap: 14px; margin-bottom: 20px; align-items: center;
+        }
+
+        .search-box {
+            flex: 1; position: relative;
+        }
+
+        .search-box input {
+            width: 100%; padding: 11px 16px 11px 40px;
+            border: 1.5px solid var(--cream-dark); border-radius: 10px;
+            font-family: 'DM Sans', sans-serif; font-size: 14px;
+            background: white; color: var(--text-dark); outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus { border-color: var(--gold); }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%); font-size: 14px; pointer-events: none;
+        }
+
+        /* Table */
+        .table-card {
+            background: white; border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.06); overflow: hidden;
+        }
+
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%; border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 13px 20px;
+            font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.07em;
+            color: var(--text-muted); background: #faf8f4;
+            text-align: left; white-space: nowrap;
+            border-bottom: 1px solid #f0ece3;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f9f7f3;
+            transition: background 0.15s;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #faf8f4; }
+
+        tbody td {
+            padding: 14px 20px;
+            font-size: 14px; color: var(--text-dark);
+            vertical-align: middle;
+        }
+
+        .td-muted { color: var(--text-muted); font-size: 13px; }
+
+        .badge {
+            display: inline-block; padding: 3px 10px;
+            border-radius: 20px; font-size: 11px; font-weight: 500;
+        }
+
+        .badge-green { background: rgba(26,122,74,0.1); color: var(--success); }
+        .badge-red   { background: rgba(192,57,43,0.1); color: var(--danger); }
+
+        .action-btns { display: flex; gap: 8px; }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 14px; border-radius: 7px;
+            font-family: 'DM Sans', sans-serif; font-size: 12px;
+            font-weight: 500; cursor: pointer; border: none; transition: all 0.15s;
+        }
+
+        .btn-edit   { background: rgba(15,27,45,0.07); color: var(--navy); }
+        .btn-edit:hover { background: rgba(15,27,45,0.14); }
+        .btn-delete { background: rgba(192,57,43,0.08); color: var(--danger); }
+        .btn-delete:hover { background: rgba(192,57,43,0.16); }
+
+        .empty-state {
+            padding: 60px 20px; text-align: center; color: var(--text-muted);
+        }
+
+        .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+        .empty-state p { font-size: 14px; }
+
+        .table-footer {
+            padding: 14px 20px; background: #faf8f4;
+            border-top: 1px solid #f0ece3;
+            font-size: 13px; color: var(--text-muted);
+        }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(15,27,45,0.6);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+        .modal {
+            background: var(--cream); border-radius: 16px;
+            padding: 36px; width: 520px; max-width: 95vw;
+            transform: translateY(20px); transition: transform 0.25s;
+            max-height: 90vh; overflow-y: auto;
+        }
+
+        .modal-overlay.active .modal { transform: translateY(0); }
+
+        .modal-header {
+            display: flex; align-items: center;
+            justify-content: space-between; margin-bottom: 28px;
+        }
+
+        .modal-header h3 { font-family: 'DM Serif Display', serif; font-size: 22px; }
+
+        .btn-close {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--cream-dark); border: none;
+            cursor: pointer; font-size: 16px; display: flex;
+            align-items: center; justify-content: center;
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.full { grid-column: 1 / -1; }
+
+        .form-group label {
+            font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--text-dark);
+        }
+
+        .form-group input {
+            padding: 11px 14px; border: 1.5px solid var(--cream-dark);
+            border-radius: 9px; font-family: 'DM Sans', sans-serif;
+            font-size: 14px; color: var(--text-dark); background: white; outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus { border-color: var(--gold); }
+
+        .modal-footer {
+            display: flex; gap: 12px; margin-top: 28px; justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            padding: 11px 22px; background: transparent;
+            border: 1.5px solid var(--cream-dark); border-radius: 9px;
+            font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer;
+        }
+
+        .btn-save {
+            padding: 11px 28px; background: var(--navy); color: var(--cream);
+            border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif;
+            font-size: 14px; font-weight: 500; cursor: pointer;
+        }
+
+        .btn-save:hover { background: var(--navy-light); }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 28px; right: 28px;
+            background: var(--navy); color: var(--cream);
+            padding: 14px 20px; border-radius: 10px;
+            font-size: 14px; z-index: 999;
+            transform: translateY(80px); opacity: 0;
+            transition: all 0.3s; pointer-events: none;
+        }
+
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { border-left: 4px solid #1a7a4a; }
+        .toast.error   { border-left: 4px solid var(--danger); }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="icon">🏠</div>
+        <h2>Hostel Management</h2>
+        <p>Admin Panel</p>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+        <a class="nav-item active" href="students.html"><span class="nav-icon">👤</span> Students</a>
+        <a class="nav-item" href="rooms.html"><span class="nav-icon">🚪</span> Rooms</a>
+        <a class="nav-item" href="allocations.html"><span class="nav-icon">🔑</span> Allocations</a>
+        <div class="nav-label">Finance</div>
+        <a class="nav-item" href="payments.html"><span class="nav-icon">💰</span> Payments</a>
+        <div class="nav-label">Admin</div>
+        <a class="nav-item" href="staff.html"><span class="nav-icon">👥</span> Staff</a>
+        <a class="nav-item" href="complaints.html"><span class="nav-icon">📋</span> Complaints</a>
+        <a class="nav-item" href="reports.html"><span class="nav-icon">📈</span> Reports</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <span id="userName">Admin</span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+    <div class="page-header">
+        <div>
+            <h1>Students</h1>
+            <p>Manage all hostel tenants and their records</p>
+        </div>
+        <button class="btn-primary" onclick="openModal()">
+            <span>＋</span> Add Student
+        </button>
+    </div>
+
+    <div class="toolbar">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search by name or enrollment ID..." oninput="filterStudents()">
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Full Name</th>
+                        <th>Enrollment ID</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Guardian</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="table-footer" id="tableFooter">Loading students...</div>
+    </div>
+</main>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">Add Student</h3>
+            <button class="btn-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="form-grid">
+            <div class="form-group full">
+                <label>Full Name</label>
+                <input type="text" id="fullName" placeholder="e.g. Mahin Fatima">
+            </div>
+            <div class="form-group">
+                <label>Enrollment ID</label>
+                <input type="text" id="enrollmentId" placeholder="e.g. 09-227242-001">
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" id="phone" placeholder="e.g. 0300-1234567">
+            </div>
+            <div class="form-group full">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="e.g. student@email.com">
+            </div>
+            <div class="form-group">
+                <label>Guardian Name</label>
+                <input type="text" id="guardianName" placeholder="Guardian's full name">
+            </div>
+            <div class="form-group">
+                <label>Guardian Phone</label>
+                <input type="text" id="guardianPhone" placeholder="Guardian's phone">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-save" onclick="saveStudent()">Save Student</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+    if (!token) window.location.href = '/index.html';
+
+    document.getElementById('userName').textContent = username || 'Admin';
+    document.getElementById('userAvatar').textContent = (username || 'A')[0].toUpperCase();
+
+    function logout() { localStorage.clear(); window.location.href = '/index.html'; }
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+
+    let allStudents = [];
+    let editingId = null;
+
+    async function loadStudents() {
+        try {
+            const res = await fetch('/api/students', { headers });
+            allStudents = await res.json();
+            renderStudents(allStudents);
+        } catch (err) {
+            showToast('Failed to load students', 'error');
+        }
+    }
+
+    function renderStudents(students) {
+        const tbody = document.getElementById('studentsTableBody');
+        const footer = document.getElementById('tableFooter');
+
+        if (!students.length) {
+            tbody.innerHTML = `
+                <tr><td colspan="7">
+                    <div class="empty-state">
+                        <div class="emoji">👤</div>
+                        <p>No students found. Add your first student!</p>
+                    </div>
+                </td></tr>`;
+            footer.textContent = '0 students';
+            return;
+        }
+
+        tbody.innerHTML = students.map((s, i) => `
+            <tr>
+                <td class="td-muted">${i + 1}</td>
+                <td><strong>${s.full_name}</strong></td>
+                <td class="td-muted">${s.enrollment_id}</td>
+                <td class="td-muted">${s.phone || '—'}</td>
+                <td class="td-muted">${s.email || '—'}</td>
+                <td class="td-muted">${s.guardian_name || '—'}</td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-edit" onclick="editStudent(${s.student_id})">Edit</button>
+                        <button class="btn-delete" onclick="deleteStudent(${s.student_id})">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        footer.textContent = `${students.length} student${students.length !== 1 ? 's' : ''} total`;
+    }
+
+    function filterStudents() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allStudents.filter(s =>
+            s.full_name.toLowerCase().includes(q) ||
+            s.enrollment_id.toLowerCase().includes(q)
+        );
+        renderStudents(filtered);
+    }
+
+    function openModal(id = null) {
+        editingId = id;
+        document.getElementById('modalTitle').textContent = id ? 'Edit Student' : 'Add Student';
+        if (!id) {
+            ['fullName','enrollmentId','phone','email','guardianName','guardianPhone']
+                .forEach(f => document.getElementById(f).value = '');
+        }
+        document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('active');
+        editingId = null;
+    }
+
+    function editStudent(id) {
+        const s = allStudents.find(s => s.student_id === id);
+        if (!s) return;
+        document.getElementById('fullName').value      = s.full_name || '';
+        document.getElementById('enrollmentId').value  = s.enrollment_id || '';
+        document.getElementById('phone').value         = s.phone || '';
+        document.getElementById('email').value         = s.email || '';
+        document.getElementById('guardianName').value  = s.guardian_name || '';
+        document.getElementById('guardianPhone').value = s.guardian_phone || '';
+        openModal(id);
+    }
+
+    async function saveStudent() {
+        const body = {
+            full_name:      document.getElementById('fullName').value.trim(),
+            enrollment_id:  document.getElementById('enrollmentId').value.trim(),
+            phone:          document.getElementById('phone').value.trim(),
+            email:          document.getElementById('email').value.trim(),
+            guardian_name:  document.getElementById('guardianName').value.trim(),
+            guardian_phone: document.getElementById('guardianPhone').value.trim()
+        };
+
+        if (!body.full_name || !body.enrollment_id) {
+            showToast('Name and Enrollment ID are required', 'error');
+            return;
+        }
+
+        try {
+            const url    = editingId ? `/api/students/${editingId}` : '/api/students';
+            const method = editingId ? 'PUT' : 'POST';
+            const res    = await fetch(url, { method, headers, body: JSON.stringify(body) });
+            const data   = await res.json();
+
+            if (res.ok) {
+                showToast(editingId ? 'Student updated!' : 'Student added!', 'success');
+                closeModal();
+                loadStudents();
+            } else {
+                showToast(data.message || 'Something went wrong', 'error');
+            }
+        } catch (err) {
+            showToast('Server error', 'error');
+        }
+    }
+
+    async function deleteStudent(id) {
+        if (!confirm('Are you sure you want to delete this student?')) return;
+        try {
+            const res = await fetch(`/api/students/${id}`, { method: 'DELETE', headers });
+            if (res.ok) {
+                showToast('Student deleted', 'success');
+                loadStudents();
+            }
+        } catch (err) {
+            showToast('Delete failed', 'error');
+        }
+    }
+
+    function showToast(msg, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.className = 'toast', 3000);
+    }
+
+    loadStudents();
+</script>
+</body>
+</html>

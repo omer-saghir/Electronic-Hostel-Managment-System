@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Hostel Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --navy: #0f1b2d;
+            --navy-light: #1a2d45;
+            --gold: #c9a84c;
+            --gold-light: #e2c47a;
+            --cream: #f5f0e8;
+            --cream-dark: #ede6d6;
+            --sidebar-w: 240px;
+            --text-dark: #0f1b2d;
+            --text-muted: #6b7a8d;
+            --success: #1a7a4a;
+            --danger: #c0392b;
+            --warning: #d68910;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f0ece3;
+            display: flex;
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--navy);
+            min-height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-brand {
+            padding: 28px 24px 24px;
+            border-bottom: 1px solid rgba(201,168,76,0.15);
+        }
+
+        .sidebar-brand .icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-brand h2 {
+            font-family: 'DM Serif Display', serif;
+            color: var(--cream);
+            font-size: 16px;
+            line-height: 1.3;
+        }
+
+        .sidebar-brand p {
+            color: rgba(245,240,232,0.4);
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .nav-label {
+            padding: 0 24px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(245,240,232,0.3);
+            margin-bottom: 8px;
+            margin-top: 16px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 24px;
+            color: rgba(245,240,232,0.6);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 400;
+            transition: all 0.15s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            color: var(--cream);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .nav-item.active {
+            color: var(--gold);
+            background: rgba(201,168,76,0.1);
+            border-right: 2px solid var(--gold);
+        }
+
+        .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+        .sidebar-footer {
+            padding: 20px 24px;
+            border-top: 1px solid rgba(201,168,76,0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .user-info span {
+            color: var(--cream);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 9px;
+            background: rgba(192,57,43,0.15);
+            border: 1px solid rgba(192,57,43,0.3);
+            border-radius: 8px;
+            color: #e87c74;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover { background: rgba(192,57,43,0.25); }
+
+        /* ── Main content ── */
+        .main {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            padding: 36px 40px;
+            animation: fadeIn 0.4s ease both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 36px;
+        }
+
+        .page-header h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 30px;
+            color: var(--text-dark);
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .date-badge {
+            background: white;
+            border: 1px solid var(--cream-dark);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ── Stat cards ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            border: 1px solid rgba(0,0,0,0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: fadeIn 0.4s ease both;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.10s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-card:nth-child(4) { animation-delay: 0.20s; }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .icon-navy  { background: rgba(15,27,45,0.08); }
+        .icon-gold  { background: rgba(201,168,76,0.12); }
+        .icon-green { background: rgba(26,122,74,0.1); }
+        .icon-red   { background: rgba(192,57,43,0.1); }
+
+        .stat-card .value {
+            font-family: 'DM Serif Display', serif;
+            font-size: 34px;
+            color: var(--text-dark);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .stat-card .sub {
+            font-size: 12px;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .sub.green { color: var(--success); }
+        .sub.red   { color: var(--danger); }
+        .sub.gold  { color: var(--warning); }
+
+        /* ── Bottom grid ── */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid #f0ece3;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .card-header a {
+            font-size: 12px;
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .card-body { padding: 0; }
+
+        .table-row {
+            display: grid;
+            padding: 13px 24px;
+            border-bottom: 1px solid #f9f7f3;
+            font-size: 13px;
+            align-items: center;
+        }
+
+        .table-row:last-child { border-bottom: none; }
+
+        .table-row.header {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            background: #faf8f4;
+        }
+
+        .students-row { grid-template-columns: 2fr 1.5fr 1fr; }
+        .payments-row { grid-template-columns: 2fr 1fr 1fr; }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-green  { background: rgba(26,122,74,0.1);  color: var(--success); }
+        .badge-red    { background: rgba(192,57,43,0.1);  color: var(--danger); }
+        .badge-gold   { background: rgba(201,168,76,0.12); color: #8a6d1e; }
+        .badge-navy   { background: rgba(15,27,45,0.08);  color: var(--navy); }
+
+        .empty-state {
+            padding: 40px 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* Rooms overview */
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 20px 24px;
+        }
+
+        .room-cell {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .room-cell.occupied { background: rgba(15,27,45,0.12); color: var(--navy); }
+        .room-cell.vacant   { background: rgba(26,122,74,0.1); color: var(--success); }
+
+        .loading {
+            padding: 30px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="icon">🏠</div>
+        <h2>Hostel Management</h2>
+        <p>Admin Panel</p>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a class="nav-item active" href="dashboard.html">
+            <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a class="nav-item" href="students.html">
+            <span class="nav-icon">👤</span> Students
+        </a>
+        <a class="nav-item" href="rooms.html">
+            <span class="nav-icon">🚪</span> Rooms
+        </a>
+        <a class="nav-item" href="allocations.html">
+            <span class="nav-icon">🔑</span> Allocations
+        </a>
+        <div class="nav-label">Finance</div>
+        <a class="nav-item" href="payments.html">
+            <span class="nav-icon">💰</span> Payments
+        </a>
+        <div class="nav-label">Admin</div>
+        <a class="nav-item" href="staff.html">
+            <span class="nav-icon">👥</span> Staff
+        </a>
+        <a class="nav-item" href="complaints.html">
+            <span class="nav-icon">📋</span> Complaints
+        </a>
+        <a class="nav-item" href="reports.html">
+            <span class="nav-icon">📈</span> Reports
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <span id="userName">Admin</span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main">
+    <div class="page-header">
+        <div>
+            <h1>Dashboard</h1>
+            <p>Overview of your hostel operations</p>
+        </div>
+        <div class="date-badge" id="dateBadge"></div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon icon-navy">👤</div>
+            <div class="value" id="totalStudents">—</div>
+            <div class="label">Total Students</div>
+            <div class="sub navy" id="activeAllocations"></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-gold">🚪</div>
+            <div class="value" id="totalRooms">—</div>
+            <div class="label">Total Rooms</div>
+            <div class="sub green" id="vacantRooms"></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-green">💰</div>
+            <div class="value" id="totalRevenue">—</div>
+            <div class="label">Total Revenue (PKR)</div>
+            <div class="sub green" id="paidPayments"></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-red">⚠️</div>
+            <div class="value" id="pendingPayments">—</div>
+            <div class="label">Pending Payments</div>
+            <div class="sub red" id="openComplaints"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Grid -->
+    <div class="bottom-grid">
+        <!-- Recent Students -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Recent Students</h3>
+                <a href="students.html">View all →</a>
+            </div>
+            <div class="card-body">
+                <div class="table-row header students-row">
+                    <span>Name</span>
+                    <span>Enrollment ID</span>
+                    <span>Status</span>
+                </div>
+                <div id="recentStudents"><div class="loading">Loading...</div></div>
+            </div>
+        </div>
+
+        <!-- Recent Payments -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Recent Payments</h3>
+                <a href="payments.html">View all →</a>
+            </div>
+            <div class="card-body">
+                <div class="table-row header payments-row">
+                    <span>Student</span>
+                    <span>Month</span>
+                    <span>Status</span>
+                </div>
+                <div id="recentPayments"><div class="loading">Loading...</div></div>
+            </div>
+        </div>
+
+        <!-- Room Overview -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Room Availability</h3>
+                <a href="rooms.html">Manage →</a>
+            </div>
+            <div class="card-body">
+                <div id="roomsOverview"><div class="loading">Loading...</div></div>
+                <div style="display:flex;gap:16px;padding:0 24px 16px;font-size:12px;color:var(--text-muted)">
+                    <span>🟢 Vacant</span>
+                    <span>⬛ Occupied</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complaints -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Recent Complaints</h3>
+                <a href="complaints.html">View all →</a>
+            </div>
+            <div class="card-body">
+                <div class="table-row header" style="grid-template-columns:2fr 1fr 1fr">
+                    <span>Student</span>
+                    <span>Room</span>
+                    <span>Status</span>
+                </div>
+                <div id="recentComplaints"><div class="loading">Loading...</div></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Auth check
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+    if (!token) window.location.href = '/index.html';
+
+    // Set user info
+    document.getElementById('userName').textContent = username || 'Admin';
+    document.getElementById('userAvatar').textContent = (username || 'A')[0].toUpperCase();
+
+    // Set date
+    document.getElementById('dateBadge').textContent = new Date().toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/index.html';
+    }
+
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    async function loadDashboard() {
+        try {
+            const [students, rooms, payments, allocations, complaints] = await Promise.all([
+                fetch('/api/students', { headers }).then(r => r.json()),
+                fetch('/api/rooms', { headers }).then(r => r.json()),
+                fetch('/api/payments', { headers }).then(r => r.json()),
+                fetch('/api/allocations', { headers }).then(r => r.json()),
+                fetch('/api/complaints', { headers }).then(r => r.json())
+            ]);
+
+            // Stats
+            document.getElementById('totalStudents').textContent = students.length || 0;
+            document.getElementById('totalRooms').textContent = rooms.length || 0;
+
+            const paidPayments = payments.filter(p => p.status === 'paid');
+            const pendingPayments = payments.filter(p => p.status === 'pending');
+            const totalRevenue = paidPayments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+            document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString();
+            document.getElementById('pendingPayments').textContent = pendingPayments.length;
+
+            const vacantRooms = rooms.filter(r => r.status === 'vacant').length;
+            const activeAllocs = allocations.filter(a => a.status === 'active').length;
+            const openComplaints = complaints.filter(c => c.status === 'open').length;
+
+            document.getElementById('vacantRooms').textContent = `${vacantRooms} vacant rooms`;
+            document.getElementById('vacantRooms').className = 'sub green';
+            document.getElementById('activeAllocations').textContent = `${activeAllocs} active allocations`;
+            document.getElementById('paidPayments').textContent = `${paidPayments.length} payments received`;
+            document.getElementById('openComplaints').textContent = `${openComplaints} open complaints`;
+
+            // Recent Students
+            const studentsHTML = students.slice(0, 5).map(s => `
+                <div class="table-row students-row">
+                    <span style="font-weight:500">${s.full_name}</span>
+                    <span style="color:var(--text-muted)">${s.enrollment_id}</span>
+                    <span><span class="badge badge-green">Active</span></span>
+                </div>
+            `).join('');
+            document.getElementById('recentStudents').innerHTML = studentsHTML || '<div class="empty-state">No students yet</div>';
+
+            // Recent Payments
+            const paymentsHTML = payments.slice(0, 5).map(p => `
+                <div class="table-row payments-row">
+                    <span style="font-weight:500">${p.full_name}</span>
+                    <span style="color:var(--text-muted)">${p.month_paid_for}</span>
+                    <span><span class="badge ${p.status === 'paid' ? 'badge-green' : 'badge-red'}">${p.status}</span></span>
+                </div>
+            `).join('');
+            document.getElementById('recentPayments').innerHTML = paymentsHTML || '<div class="empty-state">No payments yet</div>';
+
+            // Rooms grid
+            const roomsHTML = `<div class="rooms-grid">${rooms.slice(0, 16).map(r => `
+                <div class="room-cell ${r.status}" title="Room ${r.room_number} — ${r.status}">
+                    ${r.room_number}
+                </div>
+            `).join('')}</div>`;
+            document.getElementById('roomsOverview').innerHTML = roomsHTML || '<div class="empty-state">No rooms yet</div>';
+
+            // Complaints
+            const complaintsHTML = complaints.slice(0, 5).map(c => `
+                <div class="table-row" style="grid-template-columns:2fr 1fr 1fr">
+                    <span style="font-weight:500">${c.full_name}</span>
+                    <span style="color:var(--text-muted)">Room ${c.room_number}</span>
+                    <span><span class="badge ${c.status === 'open' ? 'badge-red' : 'badge-green'}">${c.status}</span></span>
+                </div>
+            `).join('');
+            document.getElementById('recentComplaints').innerHTML = complaintsHTML || '<div class="empty-state">No complaints yet</div>';
+
+        } catch (err) {
+            console.error('Dashboard load error:', err);
+        }
+    }
+
+    loadDashboard();
+</script>
+</body>
+</html>

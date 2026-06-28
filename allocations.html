@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allocations — Hostel Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --navy: #0f1b2d; --navy-light: #1a2d45;
+            --gold: #c9a84c; --gold-light: #e2c47a;
+            --cream: #f5f0e8; --cream-dark: #ede6d6;
+            --sidebar-w: 240px; --text-dark: #0f1b2d;
+            --text-muted: #6b7a8d; --success: #1a7a4a; --danger: #c0392b;
+        }
+        body { font-family: 'DM Sans', sans-serif; background: #f0ece3; display: flex; min-height: 100vh; color: var(--text-dark); }
+        .sidebar { width: var(--sidebar-w); background: var(--navy); min-height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; z-index: 10; }
+        .sidebar-brand { padding: 28px 24px 24px; border-bottom: 1px solid rgba(201,168,76,0.15); }
+        .sidebar-brand .icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--gold), var(--gold-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; }
+        .sidebar-brand h2 { font-family: 'DM Serif Display', serif; color: var(--cream); font-size: 16px; line-height: 1.3; }
+        .sidebar-brand p { color: rgba(245,240,232,0.4); font-size: 11px; margin-top: 3px; }
+        .sidebar-nav { flex: 1; padding: 20px 0; }
+        .nav-label { padding: 0 24px; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,240,232,0.3); margin-bottom: 8px; margin-top: 16px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; cursor: pointer; }
+        .nav-item:hover { color: var(--cream); background: rgba(255,255,255,0.05); }
+        .nav-item.active { color: var(--gold); background: rgba(201,168,76,0.1); border-right: 2px solid var(--gold); }
+        .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+        .sidebar-footer { padding: 20px 24px; border-top: 1px solid rgba(201,168,76,0.1); }
+        .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .user-avatar { width: 34px; height: 34px; background: linear-gradient(135deg, var(--gold), var(--gold-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: var(--navy); }
+        .user-info span { color: var(--cream); font-size: 13px; font-weight: 500; }
+        .btn-logout { width: 100%; padding: 9px; background: rgba(192,57,43,0.15); border: 1px solid rgba(192,57,43,0.3); border-radius: 8px; color: #e87c74; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+        .btn-logout:hover { background: rgba(192,57,43,0.25); }
+        .main { margin-left: var(--sidebar-w); flex: 1; padding: 36px 40px; animation: fadeIn 0.4s ease both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+        .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 30px; }
+        .page-header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+        .btn-primary { padding: 11px 22px; background: var(--navy); color: var(--cream); border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .btn-primary:hover { background: var(--navy-light); }
+        .table-card { background: white; border-radius: 14px; border: 1px solid rgba(0,0,0,0.06); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th { padding: 13px 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); background: #faf8f4; text-align: left; border-bottom: 1px solid #f0ece3; }
+        tbody tr { border-bottom: 1px solid #f9f7f3; transition: background 0.15s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #faf8f4; }
+        tbody td { padding: 14px 20px; font-size: 14px; vertical-align: middle; }
+        .td-muted { color: var(--text-muted); font-size: 13px; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+        .badge-green { background: rgba(26,122,74,0.1); color: var(--success); }
+        .badge-red   { background: rgba(192,57,43,0.1); color: var(--danger); }
+        .action-btns { display: flex; gap: 8px; }
+        .btn-end { padding: 6px 14px; border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; border: none; background: rgba(192,57,43,0.08); color: var(--danger); }
+        .btn-end:hover { background: rgba(192,57,43,0.16); }
+        .table-footer { padding: 14px 20px; background: #faf8f4; border-top: 1px solid #f0ece3; font-size: 13px; color: var(--text-muted); }
+        .empty-state { padding: 60px 20px; text-align: center; color: var(--text-muted); }
+        .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15,27,45,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal { background: var(--cream); border-radius: 16px; padding: 36px; width: 460px; max-width: 95vw; transform: translateY(20px); transition: transform 0.25s; }
+        .modal-overlay.active .modal { transform: translateY(0); }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+        .modal-header h3 { font-family: 'DM Serif Display', serif; font-size: 22px; }
+        .btn-close { width: 32px; height: 32px; border-radius: 50%; background: var(--cream-dark); border: none; cursor: pointer; font-size: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+        .form-group label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+        .form-group input, .form-group select { padding: 11px 14px; border: 1.5px solid var(--cream-dark); border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: 14px; background: white; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--gold); }
+        .modal-footer { display: flex; gap: 12px; margin-top: 28px; justify-content: flex-end; }
+        .btn-cancel { padding: 11px 22px; background: transparent; border: 1.5px solid var(--cream-dark); border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; }
+        .btn-save { padding: 11px 28px; background: var(--navy); color: var(--cream); border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .toast { position: fixed; bottom: 28px; right: 28px; background: var(--navy); color: var(--cream); padding: 14px 20px; border-radius: 10px; font-size: 14px; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { border-left: 4px solid #1a7a4a; }
+        .toast.error   { border-left: 4px solid var(--danger); }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="icon">🏠</div>
+        <h2>Hostel Management</h2>
+        <p>Admin Panel</p>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+        <a class="nav-item" href="students.html"><span class="nav-icon">👤</span> Students</a>
+        <a class="nav-item" href="rooms.html"><span class="nav-icon">🚪</span> Rooms</a>
+        <a class="nav-item active" href="allocations.html"><span class="nav-icon">🔑</span> Allocations</a>
+        <div class="nav-label">Finance</div>
+        <a class="nav-item" href="payments.html"><span class="nav-icon">💰</span> Payments</a>
+        <div class="nav-label">Admin</div>
+        <a class="nav-item" href="staff.html"><span class="nav-icon">👥</span> Staff</a>
+        <a class="nav-item" href="complaints.html"><span class="nav-icon">📋</span> Complaints</a>
+        <a class="nav-item" href="reports.html"><span class="nav-icon">📈</span> Reports</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <span id="userName">Admin</span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="page-header">
+        <div>
+            <h1>Allocations</h1>
+            <p>Assign students to rooms and manage tenancy</p>
+        </div>
+        <button class="btn-primary" onclick="openModal()">＋ New Allocation</button>
+    </div>
+
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Enrollment ID</th>
+                    <th>Room</th>
+                    <th>Price/Month</th>
+                    <th>Move In</th>
+                    <th>Move Out</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="allocationsTableBody">
+                <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted)">Loading...</td></tr>
+            </tbody>
+        </table>
+        <div class="table-footer" id="tableFooter">Loading allocations...</div>
+    </div>
+</main>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>New Allocation</h3>
+            <button class="btn-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="form-group">
+            <label>Student</label>
+            <select id="studentSelect"><option value="">Select a student...</option></select>
+        </div>
+        <div class="form-group">
+            <label>Room</label>
+            <select id="roomSelect"><option value="">Select a vacant room...</option></select>
+        </div>
+        <div class="form-group">
+            <label>Move In Date</label>
+            <input type="date" id="moveInDate">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-save" onclick="saveAllocation()">Allocate Room</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+    if (!token) window.location.href = '/index.html';
+    document.getElementById('userName').textContent = username || 'Admin';
+    document.getElementById('userAvatar').textContent = (username || 'A')[0].toUpperCase();
+    function logout() { localStorage.clear(); window.location.href = '/index.html'; }
+
+    const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+    let allAllocations = [];
+
+    async function loadAll() {
+        try {
+            const [allocRes, studentsRes, roomsRes] = await Promise.all([
+                fetch('/api/allocations', { headers }),
+                fetch('/api/students', { headers }),
+                fetch('/api/rooms', { headers })
+            ]);
+            allAllocations = await allocRes.json();
+            const students = await studentsRes.json();
+            const rooms    = await roomsRes.json();
+
+            // Populate selects
+            const sSelect = document.getElementById('studentSelect');
+            students.forEach(s => {
+                const o = document.createElement('option');
+                o.value = s.student_id;
+                o.textContent = `${s.full_name} (${s.enrollment_id})`;
+                sSelect.appendChild(o);
+            });
+
+            const rSelect = document.getElementById('roomSelect');
+            rooms.filter(r => r.status === 'vacant').forEach(r => {
+                const o = document.createElement('option');
+                o.value = r.room_id;
+                o.textContent = `Room ${r.room_number} — ${r.room_type} — PKR ${Number(r.price_per_month).toLocaleString()}/mo`;
+                rSelect.appendChild(o);
+            });
+
+            renderAllocations(allAllocations);
+        } catch (err) { showToast('Failed to load data', 'error'); }
+    }
+
+    function renderAllocations(allocations) {
+        const tbody = document.getElementById('allocationsTableBody');
+        if (!allocations.length) {
+            tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="emoji">🔑</div><p>No allocations yet. Assign a student to a room!</p></div></td></tr>`;
+            document.getElementById('tableFooter').textContent = '0 allocations';
+            return;
+        }
+        tbody.innerHTML = allocations.map((a, i) => `
+            <tr>
+                <td class="td-muted">${i+1}</td>
+                <td><strong>${a.full_name}</strong></td>
+                <td class="td-muted">${a.enrollment_id}</td>
+                <td class="td-muted">Room ${a.room_number}</td>
+                <td class="td-muted">PKR ${Number(a.price_per_month).toLocaleString()}</td>
+                <td class="td-muted">${a.move_in_date ? a.move_in_date.split('T')[0] : '—'}</td>
+                <td class="td-muted">${a.move_out_date ? a.move_out_date.split('T')[0] : '—'}</td>
+                <td><span class="badge ${a.status === 'active' ? 'badge-green' : 'badge-red'}">${a.status}</span></td>
+                <td>
+                    ${a.status === 'active' ? `<button class="btn-end" onclick="endAllocation(${a.allocation_id}, ${a.room_id})">End Tenancy</button>` : '<span class="td-muted">Ended</span>'}
+                </td>
+            </tr>`).join('');
+        document.getElementById('tableFooter').textContent = `${allocations.length} allocation${allocations.length !== 1 ? 's' : ''} total`;
+    }
+
+    function openModal() { document.getElementById('modalOverlay').classList.add('active'); }
+    function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+    async function saveAllocation() {
+        const student_id   = document.getElementById('studentSelect').value;
+        const room_id      = document.getElementById('roomSelect').value;
+        const move_in_date = document.getElementById('moveInDate').value;
+        if (!student_id || !room_id || !move_in_date) { showToast('Please fill all fields', 'error'); return; }
+        try {
+            const res  = await fetch('/api/allocations', { method: 'POST', headers, body: JSON.stringify({ student_id, room_id, move_in_date }) });
+            const data = await res.json();
+            if (res.ok) { showToast('Room allocated!', 'success'); closeModal(); location.reload(); }
+            else showToast(data.message || 'Error', 'error');
+        } catch (err) { showToast('Server error', 'error'); }
+    }
+
+    async function endAllocation(id, room_id) {
+        if (!confirm('End this tenancy?')) return;
+        const move_out_date = new Date().toISOString().split('T')[0];
+        try {
+            const res = await fetch(`/api/allocations/${id}/end`, { method: 'PUT', headers, body: JSON.stringify({ room_id, move_out_date }) });
+            if (res.ok) { showToast('Tenancy ended', 'success'); loadAll(); }
+        } catch (err) { showToast('Error', 'error'); }
+    }
+
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.className = `toast ${type} show`;
+        setTimeout(() => t.className = 'toast', 3000);
+    }
+
+    loadAll();
+</script>
+</body>
+</html>
